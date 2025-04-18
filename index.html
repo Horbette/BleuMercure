@@ -910,6 +910,15 @@
                         <h3><i class="fas fa-home"></i> Bien Immobilier</h3>
                         <div class="form-row">
                             <div class="form-group">
+                                <label>Type d'acquisition</label>
+                                <select id="acquisitionType" onchange="updateNotaryFees()">
+                                    <option value="new" selected>Neuf</option>
+                                    <option value="old">Ancien</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
                                 <label>Type de bien</label>
                                 <select id="propertyType">
                                     <option value="apartment">Appartement</option>
@@ -929,7 +938,7 @@
                             <div class="form-group">
                                 <label>Prix d'achat</label>
                                 <div class="input-addon">
-                                    <input type="number" id="purchasePrice" value="230000">
+                                    <input type="number" id="purchasePrice" value="230000" onchange="updateNotaryFees()">
                                     <span>€</span>
                                 </div>
                             </div>
@@ -952,17 +961,26 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Frais de notaire <i class="fas fa-info-circle info-tooltip">
-                                    <span class="tooltip-text">Frais réduits pour l'immobilier neuf (2-3% du prix)</span>
+                                    <span class="tooltip-text">Calculés automatiquement selon le type d'acquisition</span>
                                 </i></label>
                                 <div class="input-addon">
-                                    <input type="number" id="notaryFees" value="5000">
+                                    <input type="number" id="notaryFees" value="3450" readonly>
+                                    <span>€</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Frais d'agence</label>
+                                <div class="input-addon">
+                                    <input type="number" id="agencyFees" value="0" onchange="updateFinancingCalculations()">
                                     <span>€</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Apport personnel</label>
+                                <label>Montant total</label>
                                 <div class="input-addon">
-                                    <input type="number" id="personalContribution" value="35000">
+                                    <input type="number" id="totalCost" value="233450" readonly>
                                     <span>€</span>
                                 </div>
                             </div>
@@ -971,10 +989,21 @@
                             <div class="form-group">
                                 <label>Montant emprunté</label>
                                 <div class="input-addon">
-                                    <input type="number" id="loanAmount" value="200000" disabled>
+                                    <input type="number" id="loanAmount" value="200000" onchange="updatePersonalContribution()">
                                     <span>€</span>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label>Apport personnel <i class="fas fa-info-circle info-tooltip">
+                                    <span class="tooltip-text">Calculé automatiquement comme la différence entre le coût total et le montant emprunté</span>
+                                </i></label>
+                                <div class="input-addon">
+                                    <input type="number" id="personalContribution" value="33450" readonly>
+                                    <span>€</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Taux d'intérêt</label>
                                 <div class="input-addon">
@@ -982,8 +1011,6 @@
                                     <span>%</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group">
                                 <label>Durée du prêt</label>
                                 <div class="input-addon">
@@ -991,6 +1018,8 @@
                                     <span>ans</span>
                                 </div>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Assurance prêt <i class="fas fa-info-circle info-tooltip">
                                     <span class="tooltip-text">Taux d'assurance emprunteur annuel</span>
@@ -1007,6 +1036,15 @@
                     <div class="form-section">
                         <h3><i class="fas fa-file-invoice-dollar"></i> Revenus Locatifs</h3>
                         <div class="form-row">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Modalité de location</label>
+                                    <select id="rentalMode" onchange="updateRentalMode()">
+                                        <option value="unfurnished" selected>Nu</option>
+                                        <option value="furnished">Meublé</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label>Loyer mensuel estimé</label>
                                 <div class="input-addon">
@@ -1061,7 +1099,6 @@
                             <div class="form-group">
                                 <label>Régime fiscal</label>
                                 <select id="taxRegime" onchange="toggleTaxDevice()">
-                                    <option value="pinel">Pinel</option>
                                     <option value="lmnp">LMNP (Loueur Meublé Non Professionnel)</option>
                                     <option value="lmp">LMP (Loueur Meublé Professionnel)</option>
                                     <option value="normal" selected>Régime réel (Déficit Foncier)</option>
@@ -1463,36 +1500,6 @@
                                     
                                     <div class="compare-card">
                                         <div class="compare-card-header">
-                                            <div class="compare-card-title">Dispositif Pinel</div>
-                                            <div class="compare-card-badge" id="badge-pinel" style="display: none;">Votre choix</div>
-                                        </div>
-                                        <div class="compare-metrics">
-                                            <div class="compare-metric">
-                                                <div class="compare-metric-label">Rendement brut</div>
-                                                <div class="compare-metric-value" id="compare-pinel-gross">3.39%</div>
-                                            </div>
-                                            <div class="compare-metric">
-                                                <div class="compare-metric-label">Rendement net</div>
-                                                <div class="compare-metric-value" id="compare-pinel-net">2.61%</div>
-                                            </div>
-                                            <div class="compare-metric">
-                                                <div class="compare-metric-label">Avantage fiscal</div>
-                                                <div class="compare-metric-value" id="compare-pinel-tax">1.35%</div>
-                                            </div>
-                                            <div class="compare-metric">
-                                                <div class="compare-metric-label">Rendement global</div>
-                                                <div class="compare-metric-value" id="compare-pinel-global">3.96%</div>
-                                            </div>
-                                            <div class="compare-metric">
-                                                <div class="compare-metric-label">Cash-flow mensuel</div>
-                                                <div class="compare-metric-value" id="compare-pinel-cashflow">+42 €</div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="compare-card">
-                                        <div class="compare-card-header">
                                             <div class="compare-card-title">LMNP (Meublé)</div>
                                             <div class="compare-card-badge" id="badge-lmnp" style="display: none;">Votre choix</div>
                                         </div>
@@ -1594,6 +1601,71 @@
             });
         });
 
+            function updateNotaryFees() {
+            const acquisitionType = document.getElementById('acquisitionType').value;
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+            
+            // Appliquer le taux approprié (1% pour neuf, 8% pour ancien)
+            let notaryFeesRate = acquisitionType === 'new' ? 0.01 : 0.08;
+            let notaryFees = purchasePrice * notaryFeesRate;
+            
+            // Mettre à jour le champ des frais de notaire
+            document.getElementById('notaryFees').value = notaryFees.toFixed(0);
+            
+            // Mettre à jour les calculs de financement
+            updateFinancingCalculations();
+            }
+
+            function updateFinancingCalculations() {
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+            const notaryFees = parseFloat(document.getElementById('notaryFees').value);
+            const agencyFees = parseFloat(document.getElementById('agencyFees').value);
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            
+            // Calculer le coût total
+            const totalCost = purchasePrice + notaryFees + agencyFees;
+            document.getElementById('totalCost').value = totalCost.toFixed(0);
+            
+            // Calculer l'apport personnel
+            const personalContribution = totalCost - loanAmount;
+            document.getElementById('personalContribution').value = personalContribution.toFixed(0);
+            }
+
+            // Met à jour l'apport personnel quand le montant emprunté change
+            function updatePersonalContribution() {
+                const totalCost = parseFloat(document.getElementById('totalCost').value);
+                const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+                
+                // Calculer l'apport personnel
+                const personalContribution = totalCost - loanAmount;
+                document.getElementById('personalContribution').value = personalContribution.toFixed(0);
+                
+                // Mettre à jour les calculs
+                runFullCalculation();
+            }
+
+        // Met à jour le mode de location
+        function updateRentalMode() {
+            const rentalMode = document.getElementById('rentalMode').value;
+            const currentRent = parseFloat(document.getElementById('monthlyRent').value);
+            
+            // Si meublé, suggérer un loyer 10% plus élevé
+            if (rentalMode === 'furnished') {
+                // Suggérer seulement si le mode a changé
+                if (!window.lastRentalMode || window.lastRentalMode !== 'furnished') {
+                    if (confirm('Souhaitez-vous appliquer une majoration de 10% au loyer pour la location meublée?')) {
+                        document.getElementById('monthlyRent').value = (currentRent * 1.1).toFixed(0);
+                    }
+                }
+            }
+            
+            // Sauvegarder le mode actuel
+            window.lastRentalMode = rentalMode;
+            
+            // Mettre à jour les calculs
+            runFullCalculation();
+        }       
+
         // Initialize tabs
         function initTabs() {
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -1666,6 +1738,12 @@
         
         // Main function to run all calculations
         function runFullCalculation() {
+            // Initialiser les frais de notaire si c'est la première exécution
+            if (!window.initialized) {
+                updateNotaryFees();
+                window.initialized = true;
+            }
+            
             // Get all form values
             const formData = getFormValues();
             
@@ -1688,26 +1766,27 @@
             updateCharts();
         }
         
-        // Get all form values
-        function getFormValues() {
+                // Get all form values
+                function getFormValues() {
             // Property values
             const propertyType = document.getElementById('propertyType').value;
+            const acquisitionType = document.getElementById('acquisitionType').value;
             const surface = parseFloat(document.getElementById('surface').value);
             const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
             const location = document.getElementById('location').value;
             
             // Financial values
             const notaryFees = parseFloat(document.getElementById('notaryFees').value);
-            const personalContribution = parseFloat(document.getElementById('personalContribution').value);
+            const agencyFees = parseFloat(document.getElementById('agencyFees').value); 
+            const totalCost = purchasePrice + notaryFees + agencyFees;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const personalContribution = totalCost - loanAmount;
             const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
             const loanDuration = parseInt(document.getElementById('loanDuration').value);
             const loanInsurance = parseFloat(document.getElementById('loanInsurance').value) / 100;
             
-            // Calculate loan amount
-            const loanAmount = purchasePrice + notaryFees - personalContribution;
-            document.getElementById('loanAmount').value = loanAmount.toFixed(0);
-            
             // Rental values
+            const rentalMode = document.getElementById('rentalMode').value;
             const monthlyRent = parseFloat(document.getElementById('monthlyRent').value);
             const annualCharges = parseFloat(document.getElementById('annualCharges').value);
             const vacancyRate = parseFloat(document.getElementById('vacancyRate').value) / 100;
@@ -1716,19 +1795,21 @@
             // Tax values
             const taxBracket = parseFloat(document.getElementById('taxBracket').value) / 100;
             const taxRegime = document.getElementById('taxRegime').value;
-            const pinelDuration = parseInt(document.getElementById('pinelDuration').value);
             const lmnpAmortization = document.getElementById('lmnpAmortization').value;
             
             // Store everything in simulationData object
             simulationData.property = {
                 type: propertyType,
+                acquisitionType: acquisitionType,
                 surface,
                 purchasePrice,
                 location,
                 notaryFees,
-                totalInvestment: purchasePrice + notaryFees
+                agencyFees,
+                totalInvestment: totalCost
             };
-            
+    
+    
             simulationData.financial = {
                 personalContribution,
                 loanAmount,
@@ -1738,6 +1819,7 @@
             };
             
             simulationData.rental = {
+                rentalMode,
                 monthlyRent,
                 annualRent: monthlyRent * 12,
                 annualCharges,
@@ -1749,7 +1831,6 @@
             simulationData.tax = {
                 taxBracket,
                 taxRegime,
-                pinelDuration,
                 lmnpAmortization
             };
             
@@ -2084,14 +2165,6 @@
             const realFiscalYield = (data.tax.real.totalYearlyBenefit / data.property.totalInvestment) * 100;
             const realGlobalYield = data.rental.netYield + realFiscalYield;
             
-            // Pinel regime ROI
-            const pinelTaxBenefit = data.tax.fiscalProjection.pinel
-                .reduce((acc, year) => acc + year.taxEffect, 0);
-            
-            const pinelRoi = ((cumulativeCashFlow + pinelTaxBenefit + propertyAppreciation) / data.property.totalInvestment) * 100;
-            const pinelFiscalYield = (data.tax.pinel.totalYearlyBenefit / data.property.totalInvestment) * 100;
-            const pinelGlobalYield = data.rental.netYield + pinelFiscalYield;
-            
             // LMNP regime ROI
             const lmnpTaxBenefit = data.tax.fiscalProjection.lmnp
                 .reduce((acc, year) => acc + year.taxEffect, 0);
@@ -2112,15 +2185,6 @@
                 globalYield: realGlobalYield,
                 roi10: realRoi,
                 taxBenefit10: realTaxBenefit,
-                cashFlow10: cumulativeCashFlow
-            };
-            
-            data.results.pinel = {
-                ...baseResults,
-                fiscalYield: pinelFiscalYield,
-                globalYield: pinelGlobalYield,
-                roi10: pinelRoi,
-                taxBenefit10: pinelTaxBenefit,
                 cashFlow10: cumulativeCashFlow
             };
             
@@ -2147,23 +2211,15 @@
             
             // Select the right result set based on the current regime
             switch(currentRegime) {
-                case 'pinel':
-                    resultsToShow = simulationData.results.pinel;
-                    document.getElementById('badge-real').style.display = 'none';
-                    document.getElementById('badge-pinel').style.display = 'block';
-                    document.getElementById('badge-lmnp').style.display = 'none';
-                    break;
                 case 'lmnp':
                 case 'lmp':
                     resultsToShow = simulationData.results.lmnp;
                     document.getElementById('badge-real').style.display = 'none';
-                    document.getElementById('badge-pinel').style.display = 'none';
                     document.getElementById('badge-lmnp').style.display = 'block';
                     break;
                 default: // normal
                     resultsToShow = simulationData.results.real;
                     document.getElementById('badge-real').style.display = 'block';
-                    document.getElementById('badge-pinel').style.display = 'none';
                     document.getElementById('badge-lmnp').style.display = 'none';
             }
             
@@ -2320,35 +2376,24 @@
             updateComparisonTab();
         }
         
-        // Update comparison tab separately
-        function updateComparisonTab() {
-            // Real regime
-            document.getElementById('compare-real-gross').textContent = simulationData.results.real.grossYield.toFixed(2) + '%';
-            document.getElementById('compare-real-net').textContent = simulationData.results.real.netYield.toFixed(2) + '%';
-            document.getElementById('compare-real-tax').textContent = simulationData.results.real.fiscalYield.toFixed(2) + '%';
-            document.getElementById('compare-real-global').textContent = simulationData.results.real.globalYield.toFixed(2) + '%';
-            document.getElementById('compare-real-cashflow').textContent = (simulationData.results.real.monthlyCashFlow >= 0 ? '+' : '') + 
-                                                                      simulationData.results.real.monthlyCashFlow.toFixed(0) + ' €';
-
-            
-            // Pinel regime
-            document.getElementById('compare-pinel-gross').textContent = simulationData.results.pinel.grossYield.toFixed(2) + '%';
-            document.getElementById('compare-pinel-net').textContent = simulationData.results.pinel.netYield.toFixed(2) + '%';
-            document.getElementById('compare-pinel-tax').textContent = simulationData.results.pinel.fiscalYield.toFixed(2) + '%';
-            document.getElementById('compare-pinel-global').textContent = simulationData.results.pinel.globalYield.toFixed(2) + '%';
-            document.getElementById('compare-pinel-cashflow').textContent = (simulationData.results.pinel.monthlyCashFlow >= 0 ? '+' : '') + 
-                                                                      simulationData.results.pinel.monthlyCashFlow.toFixed(0) + ' €';
-
-            
-            // LMNP regime
-            document.getElementById('compare-lmnp-gross').textContent = simulationData.results.lmnp.grossYield.toFixed(2) + '%';
-            document.getElementById('compare-lmnp-net').textContent = simulationData.results.lmnp.netYield.toFixed(2) + '%';
-            document.getElementById('compare-lmnp-tax').textContent = simulationData.results.lmnp.fiscalYield.toFixed(2) + '%';
-            document.getElementById('compare-lmnp-global').textContent = simulationData.results.lmnp.globalYield.toFixed(2) + '%';
-            document.getElementById('compare-lmnp-cashflow').textContent = (simulationData.results.lmnp.monthlyCashFlow >= 0 ? '+' : '') + 
-                                                                      simulationData.results.lmnp.monthlyCashFlow.toFixed(0) + ' €';
-
-        }
+            // Update comparison tab separately
+            function updateComparisonTab() {
+                // Real regime
+                document.getElementById('compare-real-gross').textContent = simulationData.results.real.grossYield.toFixed(2) + '%';
+                document.getElementById('compare-real-net').textContent = simulationData.results.real.netYield.toFixed(2) + '%';
+                document.getElementById('compare-real-tax').textContent = simulationData.results.real.fiscalYield.toFixed(2) + '%';
+                document.getElementById('compare-real-global').textContent = simulationData.results.real.globalYield.toFixed(2) + '%';
+                document.getElementById('compare-real-cashflow').textContent = (simulationData.results.real.monthlyCashFlow >= 0 ? '+' : '') + 
+                                                                        simulationData.results.real.monthlyCashFlow.toFixed(0) + ' €';
+                
+                // LMNP regime
+                document.getElementById('compare-lmnp-gross').textContent = simulationData.results.lmnp.grossYield.toFixed(2) + '%';
+                document.getElementById('compare-lmnp-net').textContent = simulationData.results.lmnp.netYield.toFixed(2) + '%';
+                document.getElementById('compare-lmnp-tax').textContent = simulationData.results.lmnp.fiscalYield.toFixed(2) + '%';
+                document.getElementById('compare-lmnp-global').textContent = simulationData.results.lmnp.globalYield.toFixed(2) + '%';
+                document.getElementById('compare-lmnp-cashflow').textContent = (simulationData.results.lmnp.monthlyCashFlow >= 0 ? '+' : '') + 
+                                                                        simulationData.results.lmnp.monthlyCashFlow.toFixed(0) + ' €';
+            }
         
         // Initialize charts
         function initCharts() {
